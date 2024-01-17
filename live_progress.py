@@ -40,7 +40,7 @@ def worker(
     return acc
 
 
-def aggregate(
+def parallel_scan(
     numbers: list[int],
     num_workers: int,
 ) -> int:
@@ -50,8 +50,8 @@ def aggregate(
             time.sleep(0.1)
 
     num_workers = min(len(numbers), num_workers)
-    num_chunks_per_worker = len(numbers) // num_workers
-    remainder = len(numbers) - num_workers * num_chunks_per_worker
+    num_numbers_per_worker = len(numbers) // num_workers
+    remainder = len(numbers) - num_workers * num_numbers_per_worker
 
     # We're using a SyncManager object to synchronize information between
     # processes. A Manager creates its own process which holds the data to be
@@ -86,7 +86,7 @@ def aggregate(
         worker_pargs = []
         begin = 0
         for i in range(num_workers):
-            end = begin + num_chunks_per_worker + bool(i < remainder)
+            end = begin + num_numbers_per_worker + bool(i < remainder)
             worker_pargs.append((numbers[begin:end], progress_counter, lock))
             begin = end
         with mp.get_context("spawn").Pool(num_workers) as p:
@@ -109,7 +109,7 @@ def main():
     num_workers = 12
 
     start = time.time()
-    result = aggregate(numbers, num_workers)
+    result = parallel_scan(numbers, num_workers)
     stop = time.time()
     print(f"got {result}, expected {sum(numbers)}, took {(stop-start):.4f}s")
 
