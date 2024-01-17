@@ -86,7 +86,7 @@ def parallel_scan(
         worker_pargs = []
         begin = 0
         for i in range(num_workers):
-            end = begin + num_numbers_per_worker + bool(i < remainder)
+            end = begin + num_numbers_per_worker + (i < remainder)
             worker_pargs.append((numbers[begin:end], progress_counter, lock))
             begin = end
         with mp.get_context("spawn").Pool(num_workers) as p:
